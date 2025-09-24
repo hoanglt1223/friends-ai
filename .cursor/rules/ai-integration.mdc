@@ -1,0 +1,69 @@
+---
+globs: api/**/*openai*.ts,api/**/*chat*.ts,api/**/*ai*.ts
+description: AI integration and OpenAI service guidelines
+---
+
+# AI Integration Guidelines
+
+## OpenAI Service Integration
+- Use OpenAI API for chat functionality and AI responses
+- Implement proper error handling for API failures
+- Use streaming responses for better user experience
+- Implement rate limiting and cost management
+
+## AI Board Members
+- Each AI member should have distinct personality traits
+- Implement consistent character responses
+- Use system prompts to maintain personality consistency
+- Store personality configurations in database
+
+## Chat System
+- Implement real-time chat with WebSocket connections
+- Use message queuing for reliable delivery
+- Implement typing indicators and message status
+- Support both text and media messages (paid plans)
+
+## Prompt Engineering
+- Design effective system prompts for each AI personality
+- Implement context management for conversations
+- Use conversation history for better responses
+- Implement prompt versioning for A/B testing
+
+## File Structure
+```
+api/
+├── _shared/
+│   ├── openai.ts          # OpenAI service configuration
+│   ├── openai-services.ts # AI service implementations
+│   └── translation-cache.ts # Translation caching
+├── chat/
+│   └── send.ts            # Chat message handling
+└── board-members/         # AI member management
+    ├── index.ts           # List members
+    ├── [id].ts           # Individual member operations
+    └── initialize.ts     # Initialize default members
+```
+
+## Error Handling
+- Handle API rate limits gracefully
+- Implement retry logic with exponential backoff
+- Fallback to cached responses when possible
+- Log AI service errors for monitoring
+
+## Performance Optimization
+- Cache AI responses when appropriate
+- Implement conversation summarization for long chats
+- Use streaming for real-time responses
+- Optimize token usage for cost efficiency
+
+## Security
+- Validate all AI inputs
+- Sanitize AI outputs before display
+- Implement content filtering
+- Protect against prompt injection attacks
+
+## Monitoring
+- Track AI usage and costs
+- Monitor response quality
+- Log conversation metrics
+- Implement user feedback collection

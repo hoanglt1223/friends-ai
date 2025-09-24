@@ -30,6 +30,14 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  // Checkout.vn payment fields
+  checkoutVnOrderId: varchar("checkout_vn_order_id"),
+  subscriptionPlan: varchar("subscription_plan"), // premium, pro
+  subscriptionStatus: varchar("subscription_status").default("none"), // none, pending, active, expired, cancelled
+  subscriptionAmount: integer("subscription_amount"), // Amount in VND
+  lastPaymentStatus: varchar("last_payment_status"), // success, failed, pending, cancelled
+  lastPaymentUpdate: varchar("last_payment_update"), // ISO date string
+  // Legacy Stripe fields (keep for migration compatibility)
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
   subscriptionTier: varchar("subscription_tier").default("free"), // free, premium
@@ -58,6 +66,7 @@ export const conversations = pgTable("conversations", {
   title: varchar("title").default("New Conversation"),
   lastMessageAt: timestamp("last_message_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Chat Messages

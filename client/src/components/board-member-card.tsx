@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Trash2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Settings, Trash2, MessageCircle } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { BOARD_MEMBERS_API } from "@/lib/apiRoutes";
 import type { BoardMember } from "@shared/schema";
 
 interface BoardMemberCardProps {
@@ -27,16 +27,20 @@ export function BoardMemberCard({
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/board-members/${id}`);
+      const response = await fetch(BOARD_MEMBERS_API.delete(id), {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete board member");
+      return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/board-members"] });
+      queryClient.invalidateQueries({ queryKey: [BOARD_MEMBERS_API.list()] });
       toast({
         title: "Board member removed",
-        description: "The board member has been successfully removed.",
+        description: `${member.name} has been removed from your board.`,
       });
     },
-    onError: (error) => {
+    onError: () => {
       toast({
         title: "Error",
         description: "Failed to remove board member. Please try again.",

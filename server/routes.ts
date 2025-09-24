@@ -1,24 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
-import Stripe from "stripe";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { generateAIResponse, createPersonalitySystemPrompt, defaultPersonalities } from "./openai";
 import { 
   insertBoardMemberSchema, 
-  insertConversationSchema, 
-  insertMessageSchema,
-  insertSystemSettingSchema 
-} from "@shared/schema";
-
-// Initialize Stripe only if the secret key is available
-let stripe: Stripe | null = null;
-if (process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: "2025-08-27.basil",
-  });
-}
+  insertConversationSchema} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -115,12 +103,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const defaultMembers = defaultPersonalities.slice(0, 2);
         
         for (const memberTemplate of defaultMembers) {
-          const systemPrompt = await createPersonalitySystemPrompt(memberTemplate.personality);
+          const systemPrompt = await createPersonalitySystemPrompt(memberTemplate.type);
           
           await storage.createBoardMember({
             userId,
             name: memberTemplate.name,
-            personality: memberTemplate.personality,
+            personality: memberTemplate.type,
             description: memberTemplate.description,
             avatarUrl: memberTemplate.avatarUrl,
             systemPrompt,
@@ -214,61 +202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Stripe subscription routes
-  app.post('/api/get-or-create-subscription', isAuthenticated, async (req: any, res) => {
-    if (!stripe) {
-      return res.status(503).json({ message: "Payment processing is currently unavailable" });
-    }
-    const userId = req.user.claims.sub;
-    let user = await storage.getUser(userId);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    if (user.stripeSubscriptionId) {
-      try {
-        const subscription = await stripe!.subscriptions.retrieve(user.stripeSubscriptionId);
-        res.json({
-          subscriptionId: subscription.id,
-          clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
-        });
-        return;
-      } catch (error) {
-        console.error("Error retrieving existing subscription:", error);
-      }
-    }
-
-    if (!user.email) {
-      return res.status(400).json({ message: 'No user email on file' });
-    }
-
-    try {
-      const customer = await stripe!.customers.create({
-        email: user.email,
-        name: `${user.firstName} ${user.lastName}`.trim(),
-      });
-
-      const subscription = await stripe!.subscriptions.create({
-        customer: customer.id,
-        items: [{
-          price: process.env.STRIPE_PRICE_ID || 'price_1234567890', // Replace with actual price ID
-        }],
-        payment_behavior: 'default_incomplete',
-        expand: ['latest_invoice.payment_intent'],
-      });
-
-      await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
-
-      res.json({
-        subscriptionId: subscription.id,
-        clientSecret: (subscription.latest_invoice as any)?.payment_intent?.client_secret,
-      });
-    } catch (error: any) {
-      console.error("Error creating subscription:", error);
-      res.status(400).json({ error: { message: error.message } });
-    }
-  });
 
   const httpServer = createServer(app);
 
@@ -349,13 +283,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }));
 
                 const aiResponse = await generateAIResponse(
-                  content,
-                  {
-                    name: member.name,
-                    personality: member.personality,
-                    systemPrompt: member.systemPrompt
-                  },
-                  conversationHistory
+                  member,
+                  recentMessages.slice(-10),
+                  content
                 );
 
                 // Save AI response

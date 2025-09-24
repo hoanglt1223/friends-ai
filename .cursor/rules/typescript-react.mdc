@@ -1,0 +1,66 @@
+---
+globs: *.ts,*.tsx
+description: TypeScript and React development guidelines
+---
+
+# TypeScript & React Guidelines
+
+## TypeScript Configuration
+- Use strict mode enabled
+- Prefer explicit types over `any`
+- Use path aliases: `@/*` for client code, `@shared/*` for shared code
+- Enable `allowImportingTsExtensions` for better development experience
+
+## React Patterns
+- Use functional components with hooks
+- Prefer `const` over `let` for component declarations
+- Use TypeScript interfaces for props and state
+- Implement proper error boundaries and loading states
+
+## Component Structure
+```typescript
+// Component file structure
+import React from 'react';
+import { ComponentProps } from './types';
+
+interface ComponentNameProps {
+  // Define props with proper types
+}
+
+export const ComponentName: React.FC<ComponentNameProps> = ({ prop1, prop2 }) => {
+  // Component logic
+  return (
+    // JSX
+  );
+};
+```
+
+## State Management
+- Use React Query (`@tanstack/react-query`) for server state
+- Use `useState` for local component state
+- Use `useAuth` hook for authentication state
+- Use `useWebSocket` hook for real-time features
+
+## Styling
+- Use Tailwind CSS classes
+- Prefer Radix UI components for complex interactions
+- Use `cn()` utility for conditional classes
+- Follow mobile-first responsive design
+
+## File Naming
+- Use kebab-case for component files: `board-member-card.tsx`
+- Use PascalCase for component names: `BoardMemberCard`
+- Use camelCase for utility files: `authUtils.ts`
+
+## Import Order
+1. React and React-related imports
+2. Third-party libraries
+3. Internal components and utilities
+4. Type definitions
+5. Relative imports
+
+## Error Handling
+- Use try-catch blocks for async operations
+- Implement proper error boundaries
+- Use toast notifications for user feedback
+- Log errors appropriately for debugging

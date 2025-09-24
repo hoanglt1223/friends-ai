@@ -4,34 +4,38 @@
 @tailwind utilities;
 
 :root {
-  /* Properly formatted Tailwind color tokens */
-  --background: 230 60% 98%;
-  --foreground: 210 15% 12%;
+  /* Updated color scheme to match requirements */
+  --background: 210 40% 98%; /* #F8FAFC */
+  --foreground: 210 15% 12%; /* #1F2937 */
   --card: 0 0% 100%;
   --card-foreground: 210 15% 12%;
   --popover: 0 0% 100%;
   --popover-foreground: 210 15% 12%;
-  --primary: 255 75% 70%;
+  --primary: 235 69% 71%; /* #667EEA */
   --primary-foreground: 0 0% 100%;
-  --secondary: 280 40% 55%;
+  --secondary: 260 45% 56%; /* #764BA2 */
   --secondary-foreground: 0 0% 100%;
   --muted: 220 40% 96%;
   --muted-foreground: 215 20% 55%;
-  --accent: 320 85% 75%;
+  --accent: 315 100% 78%; /* #F093FB */
   --accent-foreground: 210 15% 12%;
   --destructive: 0 85% 62%;
   --destructive-foreground: 0 0% 100%;
   --border: 214 32% 91%;
   --input: 214 32% 96%;
-  --ring: 255 75% 70%;
+  --ring: 235 69% 71%;
   
-  /* Custom modern design variables */
-  --gradient-bg: linear-gradient(135deg, hsl(230, 60%, 98%) 0%, hsl(240, 50%, 96%) 50%, hsl(250, 55%, 97%) 100%);
-  --gradient-primary: linear-gradient(135deg, hsl(255, 75%, 70%) 0%, hsl(260, 65%, 45%) 100%);
-  --gradient-primary-soft: linear-gradient(135deg, hsl(250, 85%, 85%) 0%, hsl(255, 75%, 75%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(320, 85%, 75%) 0%, hsl(15, 85%, 65%) 100%);
+  /* Chat bubble colors */
+  --chat-bubble-user: 0 0% 100%; /* #FFFFFF */
+  --chat-bubble-ai: 235 100% 95%; /* #E0E7FF */
+  
+  /* Custom modern design variables with new color scheme */
+  --gradient-bg: linear-gradient(135deg, hsl(210, 40%, 98%) 0%, hsl(220, 35%, 96%) 50%, hsl(230, 40%, 97%) 100%);
+  --gradient-primary: linear-gradient(135deg, hsl(235, 69%, 71%) 0%, hsl(260, 45%, 56%) 100%);
+  --gradient-primary-soft: linear-gradient(135deg, hsl(235, 85%, 85%) 0%, hsl(235, 69%, 75%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(315, 100%, 78%) 0%, hsl(325, 85%, 65%) 100%);
   --gradient-accent-teal: linear-gradient(135deg, hsl(180, 75%, 55%) 0%, hsl(200, 70%, 60%) 100%);
-  --gradient-mesh: radial-gradient(circle at 20% 50%, hsla(255, 75%, 70%, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsla(320, 85%, 75%, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 80%, hsla(180, 75%, 55%, 0.2) 0%, transparent 50%);
+  --gradient-mesh: radial-gradient(circle at 20% 50%, hsla(235, 69%, 71%, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, hsla(315, 100%, 78%, 0.3) 0%, transparent 50%), radial-gradient(circle at 40% 80%, hsla(260, 45%, 56%, 0.2) 0%, transparent 50%);
   
   /* Glass effect variables */
   --glass-bg: hsla(0, 0%, 100%, 0.1);
@@ -112,17 +116,17 @@
   }
 }
 
-/* Enhanced Gradient System */
+/* Enhanced Gradient System with new color scheme */
 .gradient-primary {
-  background: linear-gradient(135deg, hsl(255, 75%, 70%) 0%, hsl(260, 65%, 45%) 100%);
+  background: linear-gradient(135deg, hsl(235, 69%, 71%) 0%, hsl(260, 45%, 56%) 100%);
 }
 
 .gradient-primary-soft {
-  background: linear-gradient(135deg, hsl(250, 85%, 85%) 0%, hsl(255, 75%, 75%) 100%);
+  background: linear-gradient(135deg, hsl(235, 85%, 85%) 0%, hsl(235, 69%, 75%) 100%);
 }
 
 .gradient-accent {
-  background: linear-gradient(135deg, hsl(320, 85%, 75%) 0%, hsl(15, 85%, 65%) 100%);
+  background: linear-gradient(135deg, hsl(315, 100%, 78%) 0%, hsl(325, 85%, 65%) 100%);
 }
 
 .gradient-accent-teal {
@@ -130,29 +134,30 @@
 }
 
 .gradient-background {
-  background: linear-gradient(135deg, hsl(230, 60%, 98%) 0%, hsl(240, 50%, 96%) 50%, hsl(250, 55%, 97%) 100%);
+  background: linear-gradient(135deg, hsl(210, 40%, 98%) 0%, hsl(220, 35%, 96%) 50%, hsl(230, 40%, 97%) 100%);
 }
 
 .gradient-mesh {
   background: 
-    radial-gradient(circle at 20% 50%, hsla(255, 75%, 70%, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, hsla(320, 85%, 75%, 0.3) 0%, transparent 50%),
-    radial-gradient(circle at 40% 80%, hsla(180, 75%, 55%, 0.2) 0%, transparent 50%);
+    radial-gradient(circle at 20% 50%, hsla(235, 69%, 71%, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, hsla(315, 100%, 78%, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, hsla(260, 45%, 56%, 0.2) 0%, transparent 50%);
 }
 
 .chat-bubble-user {
-  background: linear-gradient(135deg, hsl(255, 75%, 70%) 0%, hsl(260, 65%, 45%) 100%);
-  color: white;
-  box-shadow: 0 4px 20px hsla(255, 75%, 70%, 0.3);
+  background: hsl(var(--chat-bubble-user)); /* #FFFFFF */
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--primary) / 0.2);
+  box-shadow: 0 4px 20px hsla(235, 69%, 71%, 0.15);
   backdrop-filter: blur(8px);
 }
 
 .chat-bubble-ai {
-  background: hsla(0, 0%, 100%, 0.9);
-  color: hsl(210, 15%, 12%);
-  border: 1px solid hsla(255, 255, 255, 0.2);
+  background: hsl(var(--chat-bubble-ai)); /* #E0E7FF */
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--primary) / 0.3);
   backdrop-filter: blur(16px);
-  box-shadow: 0 4px 16px hsla(0, 0%, 0%, 0.05);
+  box-shadow: 0 4px 16px hsla(235, 69%, 71%, 0.1);
 }
 
 .chat-bubble-ai::before {
@@ -160,7 +165,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: linear-gradient(135deg, hsla(250, 85%, 85%, 0.1) 0%, hsla(320, 85%, 75%, 0.1) 100%);
+  background: linear-gradient(135deg, hsla(235, 85%, 85%, 0.1) 0%, hsla(315, 100%, 78%, 0.1) 100%);
   pointer-events: none;
 }
 
@@ -180,8 +185,8 @@
 }
 
 @keyframes glow {
-  from { box-shadow: 0 0 20px hsla(255, 75%, 70%, 0.2); }
-  to { box-shadow: 0 0 30px hsla(255, 75%, 70%, 0.4), 0 0 40px hsla(320, 85%, 75%, 0.2); }
+  from { box-shadow: 0 0 20px hsla(235, 69%, 71%, 0.2); }
+  to { box-shadow: 0 0 30px hsla(235, 69%, 71%, 0.4), 0 0 40px hsla(315, 100%, 78%, 0.2); }
 }
 
 .animate-slide-in-up {
@@ -328,8 +333,8 @@
 
 .glass-input:focus {
   background: hsla(0, 0%, 100%, 0.1);
-  border-color: hsla(255, 75%, 70%, 0.4);
-  box-shadow: 0 0 0 3px hsla(255, 75%, 70%, 0.1);
+  border-color: hsla(235, 69%, 71%, 0.4);
+  box-shadow: 0 0 0 3px hsla(235, 69%, 71%, 0.1);
 }
 
 /* Loading spinner customization */

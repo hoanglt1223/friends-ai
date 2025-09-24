@@ -1,0 +1,84 @@
+---
+globs: api/_shared/db-schema.ts,api/_shared/database.ts,shared/schema.ts
+description: Database schema and data management guidelines
+---
+
+# Database Schema & Data Management
+
+## Database Technology
+- **Primary Database**: PostgreSQL with Neon serverless
+- **ORM**: Drizzle ORM for type-safe database operations
+- **Caching**: Redis for performance optimization
+- **Migrations**: Drizzle Kit for schema management
+
+## Schema Design
+- Use UUIDs for primary keys
+- Implement proper foreign key relationships
+- Use timestamps for audit trails
+- Store JSON data in JSONB columns for flexibility
+
+## Current Schema
+```typescript
+// Users table - User accounts and authentication
+users: {
+  id: uuid (primary key)
+  username: varchar(255) unique
+  password: varchar(255) 
+  creditBalance: decimal(10,2) default 1000.00
+  isActive: boolean default true
+  lastLogin: timestamp
+  createdAt: timestamp
+  updatedAt: timestamp
+}
+
+// Lessons table - AI lesson content (legacy)
+lessons: {
+  id: uuid (primary key)
+  title: varchar(255)
+  level: varchar(50) // N1, N2, etc.
+  ageGroup: varchar(100) // preschool, primary, lower-secondary
+  status: varchar(50) default 'draft'
+  originalFiles: jsonb
+  aiAnalysis: jsonb
+  lessonPlans: jsonb
+  flashcards: jsonb
+  summaries: jsonb
+  createdAt: timestamp
+  updatedAt: timestamp
+}
+
+// Translation cache for performance
+translationCache: {
+  id: uuid (primary key)
+  sourceText: text
+  sourceLang: varchar(10)
+  targetLang: varchar(10)
+  translatedText: text
+  provider: varchar(50) // 'deepl' or 'openai'
+  createdAt: timestamp
+}
+```
+
+## Data Management
+- Use transactions for complex operations
+- Implement proper connection pooling
+- Use prepared statements for security
+- Implement data validation at the schema level
+
+## Migration Guidelines
+- Use Drizzle Kit for schema migrations
+- Test migrations in development first
+- Backup data before major schema changes
+- Use version control for migration files
+
+## Performance Optimization
+- Create appropriate indexes
+- Use Redis for frequently accessed data
+- Implement query optimization
+- Monitor database performance
+
+## Data Validation
+- Use Zod schemas for runtime validation
+- Implement proper error handling
+- Validate data before database operations
+- Use TypeScript types for compile-time safety

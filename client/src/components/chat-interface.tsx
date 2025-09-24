@@ -5,12 +5,13 @@ import { Card } from "@/components/ui/card";
 import { MessageBubble } from "@/components/ui/message-bubble";
 import { TypingIndicator } from "@/components/ui/typing-indicator";
 import { BoardMemberCard } from "./board-member-card";
-import { useWebSocket } from "@/hooks/useWebSocket";
+import { MediaUpload } from "@/components/media-upload";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Send, Paperclip, Smile } from "lucide-react";
+import { BOARD_MEMBERS_API, CONVERSATIONS_API, CHAT_API } from "@/lib/apiRoutes";
 import type { Message, BoardMember, Conversation } from "@shared/schema";
 
 export function ChatInterface() {
@@ -19,6 +20,7 @@ export function ChatInterface() {
   const [messageInput, setMessageInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingMembers, setTypingMembers] = useState<Map<string, BoardMember>>(new Map());
+  const [showMediaUpload, setShowMediaUpload] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -26,69 +28,102 @@ export function ChatInterface() {
 
   // Fetch board members
   const { data: boardMembers = [], isLoading: membersLoading } = useQuery<BoardMember[]>({
-    queryKey: ["/api/board-members"],
+    queryKey: [BOARD_MEMBERS_API.list()],
+    queryFn: () => fetch(BOARD_MEMBERS_API.list()).then(res => res.json()),
     enabled: !!user,
   });
 
   // Fetch conversations
   const { data: conversations = [] } = useQuery<Conversation[]>({
-    queryKey: ["/api/conversations"],
+    queryKey: [CONVERSATIONS_API.list()],
+    queryFn: () => fetch(CONVERSATIONS_API.list()).then(res => res.json()),
     enabled: !!user,
   });
 
   // Create conversation mutation
   const createConversationMutation = useMutation({
     mutationFn: async (title: string) => {
-      const response = await apiRequest("POST", "/api/conversations", { title });
+      const response = await fetch(CONVERSATIONS_API.create(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (!response.ok) throw new Error("Failed to create conversation");
       return response.json();
     },
-    onSuccess: (conversation: Conversation) => {
-      setCurrentConversation(conversation.id);
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+    onSuccess: (newConversation) => {
+      queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_API.list()] });
+      setCurrentConversation(newConversation.id);
     },
   });
 
   // Fetch messages for current conversation
-  const { data: conversationMessages = [] } = useQuery<Message[]>({
-    queryKey: ["/api/conversations", currentConversation, "messages"],
-    enabled: !!currentConversation,
+  const { data: messages = [] } = useQuery({
+    queryKey: [CONVERSATIONS_API.getMessages(currentConversation || "")],
+    queryFn: async () => {
+      const response = await apiRequest("GET", CONVERSATIONS_API.getMessages(currentConversation!));
+      return await response.json();
+    },
+    enabled: !!currentConversation && !!user,
   });
 
-  // WebSocket handlers
-  const { isConnected, sendMessage } = useWebSocket({
-    onMessage: (message) => {
-      if (message) {
-        setMessages(prev => [...prev, message]);
-      }
+  // WebSocket handlers - fallback to REST API for Vercel compatibility
+  const [isConnected, setIsConnected] = useState(true); // Always consider connected for REST API
+
+  // Send message mutation using REST API
+  const sendMessageMutation = useMutation({
+    mutationFn: async ({ conversationId, content, boardMemberIds, messageType, fileUrl, metadata }: {
+      conversationId: string;
+      content: string;
+      boardMemberIds: string[];
+      messageType?: 'text' | 'image' | 'audio';
+      fileUrl?: string;
+      metadata?: any;
+    }) => {
+      const response = await apiRequest("POST", CHAT_API.send(), {
+        conversationId,
+        content,
+        boardMemberIds,
+        messageType: messageType || 'text',
+        fileUrl,
+        metadata
+      });
+      return response.json();
     },
-    onAIResponse: (message, member) => {
-      if (message && member) {
-        setMessages(prev => [...prev, message]);
-        // Remove typing indicator for this member
-        setTypingMembers(prev => {
-          const newMap = new Map(prev);
-          newMap.delete(member.id);
-          return newMap;
+    onSuccess: (data) => {
+      // Add user message to the UI immediately
+      if (data.userMessage) {
+        setMessages(prev => [...prev, data.userMessage]);
+      }
+      
+      // Simulate typing indicators for AI responses
+      if (data.aiResponses && data.aiResponses.length > 0) {
+        data.aiResponses.forEach((response: any, index: number) => {
+          const member = boardMembers.find(m => m.id === response.member.id);
+          if (member) {
+            // Show typing indicator
+            setTypingMembers(prev => new Map(prev).set(member.id, member));
+            
+            // Add AI response after a delay
+            setTimeout(() => {
+              setMessages(prev => [...prev, response.message]);
+              setTypingMembers(prev => {
+                const newMap = new Map(prev);
+                newMap.delete(member.id);
+                return newMap;
+              });
+            }, (index + 1) * 1500); // Stagger responses
+          }
         });
       }
-    },
-    onMemberTyping: (memberId, memberName) => {
-      const member = boardMembers.find(m => m.id === memberId);
-      if (member) {
-        setTypingMembers(prev => new Map(prev).set(memberId, member));
-      }
-    },
-    onMemberStopTyping: (memberId) => {
-      setTypingMembers(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(memberId);
-        return newMap;
-      });
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_API.getMessages(currentConversation)] });
     },
     onError: (error) => {
       toast({
-        title: "Connection Error",
-        description: error,
+        title: "Failed to send message",
+        description: "Please try again.",
         variant: "destructive",
       });
     },
@@ -97,9 +132,9 @@ export function ChatInterface() {
   // Initialize default board members on first load
   useEffect(() => {
     if (user && boardMembers.length === 0 && !membersLoading) {
-      apiRequest("POST", "/api/board-members/initialize")
+      apiRequest("POST", BOARD_MEMBERS_API.initialize())
         .then(() => {
-          queryClient.invalidateQueries({ queryKey: ["/api/board-members"] });
+          queryClient.invalidateQueries({ queryKey: [BOARD_MEMBERS_API.list()] });
         })
         .catch(console.error);
     }
@@ -160,7 +195,7 @@ export function ChatInterface() {
   }, [messages, typingMembers]);
 
   const handleSendMessage = () => {
-    if (!messageInput.trim() || !currentConversation || !(user as any)?.id || !isConnected) return;
+    if (!messageInput.trim() || !currentConversation || !(user as any)?.id || sendMessageMutation.isPending) return;
     
     if (selectedMembers.length === 0) {
       toast({
@@ -171,7 +206,11 @@ export function ChatInterface() {
       return;
     }
 
-    sendMessage(currentConversation, messageInput.trim(), (user as any)?.id!, selectedMembers);
+    sendMessageMutation.mutate({
+      conversationId: currentConversation,
+      content: messageInput.trim(),
+      boardMemberIds: selectedMembers
+    });
     setMessageInput("");
   };
 
@@ -190,6 +229,22 @@ export function ChatInterface() {
         return [...prev, member.id];
       }
     });
+  };
+
+  const handleMediaUploadSuccess = (fileUrl: string, messageType: 'image' | 'audio', metadata: any) => {
+    if (!currentConversation || !(user as any)?.id) return;
+    
+    // Send media message
+    sendMessageMutation.mutate({
+      conversationId: currentConversation,
+      content: `Shared ${messageType === 'image' ? 'an image' : 'an audio file'}: ${metadata.originalName}`,
+      boardMemberIds: selectedMembers,
+      messageType,
+      fileUrl,
+      metadata
+    });
+    
+    setShowMediaUpload(false);
   };
 
   return (
@@ -296,17 +351,20 @@ export function ChatInterface() {
             </p>
           </div>
         ) : (
-          messages.map((message) => {
-            const member = boardMembers.find(m => m.id === message.senderId);
-            return (
+          messages.map((message) => (
               <MessageBubble
                 key={message.id}
                 message={message}
-                member={member}
-                isUser={message.senderType === 'user'}
+                // @ts-ignore
+                isUser={message.senderId === user?.id}
+                member={
+                  // @ts-ignore
+                  message.senderId === user?.id 
+                    ? undefined 
+                    : boardMembers.find(m => m.id === message.senderId)
+                }
               />
-            );
-          })
+            ))
         )}
 
         {/* Typing indicators */}
@@ -325,6 +383,7 @@ export function ChatInterface() {
               <Button 
                 variant="ghost" 
                 size="sm"
+                onClick={() => setShowMediaUpload(!showMediaUpload)}
                 className="glass-input border-0 hover:bg-white/10"
                 data-testid="button-attachment"
               >
@@ -360,26 +419,40 @@ export function ChatInterface() {
             </Button>
           </div>
 
-          {/* Enhanced Quick Suggestions */}
-          <div className="flex space-x-2 mt-4 overflow-x-auto scrollbar-hide">
-            {[
-              { text: "Tell me about your day", emoji: "🌟" },
-              { text: "I need advice", emoji: "💭" },
-              { text: "I'm feeling grateful for", emoji: "🙏" }
-            ].map((suggestion, index) => (
-              <Button 
-                key={suggestion.text}
-                variant="outline" 
-                size="sm" 
-                className="flex-shrink-0 glass-input border-white/20 hover:glass-card-strong transition-all duration-300 hover:scale-105"
-                onClick={() => setMessageInput(suggestion.text)}
-                data-testid={`quick-suggestion-${suggestion.text.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                <span className="mr-2">{suggestion.emoji}</span>
-                {suggestion.text}
-              </Button>
-            ))}
-          </div>
+          {/* Enhanced Quick Suggestions - only show when no messages */}
+          {messages.length === 0 && (
+            <div className="flex space-x-2 mt-4 overflow-x-auto scrollbar-hide justify-center">
+              {[
+                { text: "How's your day going?", emoji: "😊" },
+                { text: "I need some advice", emoji: "💭" },
+                { text: "Celebrating a win!", emoji: "🎉" },
+                { text: "Feeling stressed", emoji: "😰" },
+                { text: "What should I do about...", emoji: "🤔" }
+              ].map((suggestion, index) => (
+                <Button 
+                  key={suggestion.text}
+                  variant="outline" 
+                  size="sm" 
+                  className="flex-shrink-0 glass-input border-white/20 hover:glass-card-strong transition-all duration-300 hover:scale-105"
+                  onClick={() => setMessageInput(suggestion.text)}
+                  data-testid={`quick-suggestion-${suggestion.text.toLowerCase().replace(/\s+/g, '-')}`}
+                >
+                  <span className="mr-2">{suggestion.emoji}</span>
+                  {suggestion.text}
+                </Button>
+              ))}
+            </div>
+          )}
+          
+          {/* Media Upload Component */}
+          {showMediaUpload && (
+            <div className="mt-4">
+              <MediaUpload
+                onUploadSuccess={handleMediaUploadSuccess}
+                onCancel={() => setShowMediaUpload(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
 

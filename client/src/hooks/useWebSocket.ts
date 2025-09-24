@@ -51,7 +51,6 @@ export function useWebSocket({
       ws.onopen = () => {
         setIsConnected(true);
         setConnectionError(null);
-        console.log('WebSocket connected');
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = null;
@@ -114,13 +113,11 @@ export function useWebSocket({
       ws.onclose = (event) => {
         setIsConnected(false);
         connectRef.current = false;
-        console.log('WebSocket disconnected', event.code, event.reason);
         
         // Don't reconnect if it was a normal closure
         if (event.code !== 1000 && event.code !== 1001) {
           // Attempt to reconnect after a delay
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log('Attempting to reconnect WebSocket...');
             connect();
           }, 3000);
         }
@@ -165,7 +162,6 @@ export function useWebSocket({
     } else {
       console.error('WebSocket is not connected, current state:', wsRef.current?.readyState);
       if (!isConnected) {
-        console.log('Attempting to reconnect...');
         connect();
       }
     }

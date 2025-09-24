@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,9 +17,13 @@ import {
   Settings, 
   Activity,
   TrendingUp,
-  Brain
+  Brain,
+  Save,
+  ArrowLeft
 } from "lucide-react";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { ROUTES } from "@/lib/routes";
+import { ADMIN_API } from "@/lib/apiRoutes";
 
 interface Analytics {
   totalUsers: number;
@@ -49,7 +54,7 @@ export default function Admin() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = ROUTES.LOGIN_REDIRECT;
       }, 500);
       return;
     }
@@ -57,14 +62,14 @@ export default function Admin() {
 
   // Fetch analytics with error handling
   const { data: analytics, error: analyticsError } = useQuery<Analytics>({
-    queryKey: ["/api/admin/analytics"],
+    queryKey: [ADMIN_API.analytics()],
     enabled: !!user,
     retry: false,
   });
 
   // Fetch system settings with error handling
   const { data: settings = [], error: settingsError } = useQuery<SystemSetting[]>({
-    queryKey: ["/api/admin/settings"],
+    queryKey: [ADMIN_API.settings()],
     enabled: !!user,
     retry: false,
   });
@@ -80,7 +85,7 @@ export default function Admin() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = ROUTES.LOGIN_REDIRECT;
         }, 500);
         return;
       }
@@ -90,10 +95,10 @@ export default function Admin() {
   // Update setting mutation
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
-      await apiRequest("PUT", `/api/admin/settings/${key}`, { value });
+      await apiRequest("PUT", ADMIN_API.updateSetting(key), { value });
     },
     onSuccess: (_, { key }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
+      queryClient.invalidateQueries({ queryKey: [ADMIN_API.settings()] });
       toast({
         title: "Setting Updated",
         description: `${key} has been updated successfully.`,
@@ -107,7 +112,7 @@ export default function Admin() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = ROUTES.LOGIN_REDIRECT;
         }, 500);
         return;
       }

@@ -1,0 +1,99 @@
+---
+globs: client/src/components/**/*.tsx,client/src/pages/**/*.tsx
+description: UI components and styling guidelines
+---
+
+# UI Components & Styling Guidelines
+
+## Design System
+- **Primary Color**: #667EEA (warm purple)
+- **Secondary Color**: #764BA2 (deep purple)  
+- **Accent Color**: #F093FB (soft pink)
+- **Background**: #F8FAFC (light grey)
+- **Chat Bubbles**: #FFFFFF (white) and #E0E7FF (light purple)
+- **Text**: #1F2937 (dark grey)
+
+## Typography
+- **Primary Font**: Inter
+- **Secondary Font**: Poppins
+- Use consistent font sizes and weights
+- Implement proper text hierarchy
+
+## Component Library
+- Use Radix UI as the base component library
+- Customize components to match design system
+- Implement proper accessibility features
+- Use consistent spacing (16px base unit)
+
+## Layout Patterns
+- Mobile-first responsive design
+- Use CSS Grid and Flexbox for layouts
+- Implement proper breakpoints
+- Ensure touch-friendly interface elements
+
+## Chat Interface
+- Messenger-style conversation flow
+- Avatar-based member identification
+- Bubble-style message containers
+- Smooth animations and transitions
+- Typing indicators and message status
+
+## Component Structure
+```typescript
+// UI Component template
+import React from 'react';
+import { cn } from '@/lib/utils';
+import { ComponentProps } from './types';
+
+interface ComponentNameProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'secondary';
+  size?: 'sm' | 'md' | 'lg';
+}
+
+export const ComponentName = React.forwardRef<HTMLDivElement, ComponentNameProps>(
+  ({ className, variant = 'default', size = 'md', ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'base-classes',
+          {
+            'variant-classes': variant === 'secondary',
+            'size-classes': size === 'lg'
+          },
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
+```
+
+## Styling Guidelines
+- Use Tailwind CSS utility classes
+- Implement dark/light theme support
+- Use CSS custom properties for theming
+- Follow consistent naming conventions
+- Optimize for performance
+
+## Animation & Interactions
+- Use Framer Motion for complex animations
+- Implement smooth transitions
+- Add hover and focus states
+- Use proper loading states
+- Implement gesture support for mobile
+
+## Accessibility
+- Use proper ARIA labels
+- Implement keyboard navigation
+- Ensure proper color contrast
+- Use semantic HTML elements
+- Test with screen readers
+
+## Mobile Optimization
+- Touch-friendly button sizes (44px minimum)
+- Proper viewport configuration
+- Optimize for different screen sizes
+- Implement proper gesture handling
+- Use appropriate input types

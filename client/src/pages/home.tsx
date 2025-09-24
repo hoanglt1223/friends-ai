@@ -3,12 +3,15 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { ChatInterface } from "@/components/chat-interface";
 import { SubscriptionPlans } from "@/components/subscription-plans";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { Crown, Settings, LogOut, Users } from "lucide-react";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { ROUTES } from "@/lib/routes";
+import { BOARD_MEMBERS_API } from "@/lib/apiRoutes";
 
 export default function Home() {
   const { user, isLoading } = useAuth();
@@ -23,7 +26,7 @@ export default function Home() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = ROUTES.LOGIN_REDIRECT;
       }, 500);
       return;
     }
@@ -31,7 +34,8 @@ export default function Home() {
 
   // Fetch board members with error handling
   const { data: boardMembers = [], error: boardMembersError } = useQuery({
-    queryKey: ["/api/board-members"],
+    queryKey: [BOARD_MEMBERS_API.list()],
+    queryFn: () => fetch(BOARD_MEMBERS_API.list()).then(res => res.json()),
     enabled: !!user,
     retry: false,
   });
@@ -45,14 +49,14 @@ export default function Home() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        window.location.href = ROUTES.LOGIN_REDIRECT;
       }, 500);
       return;
     }
   }, [boardMembersError, toast]);
 
   const handleLogout = () => {
-    window.location.href = "/api/logout";
+    window.location.href = ROUTES.LOGIN_REDIRECT;
   };
 
   if (isLoading) {
@@ -118,6 +122,8 @@ export default function Home() {
               </Badge>
               
               {/* Modern Action Buttons */}
+              <ThemeToggle />
+              
               <Button 
                 variant="ghost" 
                 size="sm" 

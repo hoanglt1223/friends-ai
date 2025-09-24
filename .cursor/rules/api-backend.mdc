@@ -1,0 +1,80 @@
+---
+globs: api/**/*.ts,server/**/*.ts
+description: API and backend development guidelines
+---
+
+# API & Backend Guidelines
+
+## Express.js Structure
+- Use Express.js with TypeScript
+- Implement proper middleware for CORS, authentication, and error handling
+- Use async/await for database operations
+- Implement request logging and response tracking
+
+## API Routes
+- Follow RESTful conventions
+- Use proper HTTP status codes
+- Implement input validation with Zod schemas
+- Handle errors gracefully with proper error messages
+
+## Database Operations
+- Use Drizzle ORM for database operations
+- Implement proper connection pooling
+- Use transactions for complex operations
+- Cache frequently accessed data with Redis
+
+## Authentication
+- Use Passport.js for authentication
+- Implement session-based authentication
+- Protect routes with proper middleware
+- Handle authentication errors gracefully
+
+## File Structure
+```
+api/
+├── _shared/          # Shared utilities and configurations
+│   ├── auth.ts       # Authentication middleware
+│   ├── database.ts   # Database connection
+│   ├── openai.ts     # OpenAI service integration
+│   └── storage.ts    # File storage utilities
+├── admin/            # Admin-specific endpoints
+├── board-members/    # AI board member management
+├── chat/             # Chat functionality
+├── conversations/    # Conversation management
+└── subscription/     # Subscription handling
+```
+
+## Error Handling
+- Use centralized error handling middleware
+- Implement proper error logging
+- Return consistent error response format
+- Handle database connection errors
+
+## Environment Variables
+- Use environment variables for configuration
+- Implement proper validation for required env vars
+- Use different configurations for development/production
+
+## API Response Format
+```typescript
+// Success response
+{
+  success: true,
+  data: T,
+  message?: string
+}
+
+// Error response
+{
+  success: false,
+  error: string,
+  message: string
+}
+```
+
+## Security
+- Implement CORS properly
+- Validate all inputs
+- Sanitize user data
+- Use proper session management
+- Implement rate limiting where needed

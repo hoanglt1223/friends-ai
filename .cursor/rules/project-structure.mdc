@@ -1,0 +1,59 @@
+---
+alwaysApply: true
+description: Project structure and architecture guide for friends-ai
+---
+
+# Friends-AI Project Structure
+
+## Overview
+This is a **Personalized AI Board of Directors** web application that recreates a close circle of friends/family digitally as personalized AI members. Built with React + TypeScript frontend and Express.js backend.
+
+## Architecture
+- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS + Radix UI
+- **Backend**: Express.js + TypeScript + Drizzle ORM + PostgreSQL
+- **Database**: PostgreSQL with Neon serverless
+- **Authentication**: Passport.js with session management
+- **AI Integration**: OpenAI API for chat functionality
+- **Deployment**: Vercel
+
+## Directory Structure
+- `client/` - React frontend application
+  - `src/components/` - Reusable UI components (Radix UI based)
+  - `src/pages/` - Page components (landing, home, admin, subscribe)
+  - `src/hooks/` - Custom React hooks
+  - `src/lib/` - Utility functions and configurations
+- `api/` - Express.js API routes
+  - `_shared/` - Shared utilities (auth, database, OpenAI, etc.)
+  - `admin/` - Admin-specific endpoints
+  - `board-members/` - AI board member management
+  - `chat/` - Chat functionality
+  - `conversations/` - Conversation management
+  - `subscription/` - Subscription handling
+- `server/` - Server configuration and setup
+- `shared/` - Shared types and schemas between frontend and backend
+
+## Key Files
+- [package.json](mdc:package.json) - Dependencies and scripts
+- [vite.config.ts](mdc:vite.config.ts) - Vite configuration with path aliases
+- [tsconfig.json](mdc:tsconfig.json) - TypeScript configuration
+- [api/_shared/db-schema.ts](mdc:api/_shared/db-schema.ts) - Database schema definitions
+- [client/src/App.tsx](mdc:client/src/App.tsx) - Main React application
+- [server/index.ts](mdc:server/index.ts) - Express server entry point
+
+## Path Aliases
+- `@/*` - Maps to `client/src/*`
+- `@shared/*` - Maps to `shared/*`
+- `@docs/*` - Maps to `docs/*`
+
+## Database Schema
+- `users` - User accounts with credit balance
+- `lessons` - AI lesson content (legacy, may be removed)
+- `workflows` - Lesson workflow management (legacy)
+- `translationCache` - Translation caching for performance
+
+## Core Features
+1. **AI Board Members**: Create and manage personalized AI personalities
+2. **Chat Interface**: Messenger-style conversations with AI members
+3. **Subscription Tiers**: Free (2 members) vs Paid (5 members)
+4. **Admin Dashboard**: Manage AI personalities and system settings
+5. **Authentication**: User login and session management

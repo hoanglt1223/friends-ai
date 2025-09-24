@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Heart, MessageCircle, Crown, ArrowRight } from "lucide-react";
+import { ROUTES } from "@/lib/routes";
 
 export default function Landing() {
   const handleLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = ROUTES.LOGIN_REDIRECT;
   };
 
   return (

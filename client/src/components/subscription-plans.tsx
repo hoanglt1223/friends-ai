@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Crown, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { SUBSCRIPTION_API } from "@/lib/apiRoutes";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -19,7 +20,7 @@ export function SubscriptionPlans({ onUpgrade }: SubscriptionPlansProps) {
 
   const upgradeMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/get-or-create-subscription");
+      const response = await apiRequest("POST", SUBSCRIPTION_API.getOrCreate());
       return response.json();
     },
     onSuccess: (data) => {
