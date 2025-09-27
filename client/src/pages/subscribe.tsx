@@ -5,7 +5,7 @@ import { SubscriptionPlans } from "@/components/subscription-plans";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Crown, Check, X } from "lucide-react";
+import { ArrowLeft, Crown, Check, X, CreditCard } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { ROUTES } from "@/lib/routes";
@@ -156,12 +156,14 @@ export default function Subscribe() {
             <p className="text-lg text-muted-foreground mb-8">
               You have access to all premium features including 5 AI board members, custom personalities, and advanced chat features.
             </p>
-            <Link href="/">
-              <Button className="bg-gradient-to-r from-primary to-secondary" data-testid="button-back-home">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
+            <Button 
+              className="bg-gradient-to-r from-primary to-secondary" 
+              data-testid="button-back-home"
+              onClick={() => window.location.href = '/'}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
+            </Button>
           </div>
         </div>
       </div>
@@ -192,12 +194,15 @@ export default function Subscribe() {
                 <p className="text-white/80">Unlock the full AI Board experience</p>
               </div>
             </div>
-            <Link href="/">
-              <Button variant="ghost" className="text-white hover:bg-white/10" data-testid="button-back">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              className="text-white hover:bg-white/10" 
+              data-testid="button-back"
+              onClick={() => window.location.href = '/'}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
           </div>
         </div>
       </header>

@@ -44,7 +44,7 @@ export const getApiEndpoint = (key: ApiEndpointKey): ApiEndpointValue => {
  * Helper function to build API URLs with query parameters
  */
 export const buildApiUrl = (
-  endpoint: ApiEndpointValue,
+  endpoint: string,
   params?: Record<string, string | number | boolean>
 ): string => {
   if (!params || Object.keys(params).length === 0) {

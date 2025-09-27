@@ -58,7 +58,7 @@ export function ChatInterface() {
   });
 
   // Fetch messages for current conversation
-  const { data: fetchedMessages = [] } = useQuery({
+  const { data: fetchedMessages = [] } = useQuery<Message[]>({
     queryKey: [CONVERSATIONS_API.getMessages(currentConversation || "")],
     queryFn: async () => {
       const response = await apiRequest("GET", CONVERSATIONS_API.getMessages(currentConversation!));
@@ -118,7 +118,7 @@ export function ChatInterface() {
       }
       
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_API.getMessages(currentConversation)] });
+      queryClient.invalidateQueries({ queryKey: [CONVERSATIONS_API.getMessages(String(currentConversation))] });
     },
     onError: (error) => {
       toast({
