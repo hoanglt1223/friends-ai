@@ -1,16 +1,146 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, Heart, MessageCircle, Crown, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Users, Heart, MessageCircle, Crown, ArrowRight, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { AUTH_API } from "@/lib/apiRoutes";
 import { ROUTES } from "@/lib/routes";
 
 export default function Landing() {
+  const [showLoginForm, setShowLoginForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: ''
+  });
+  const { toast } = useToast();
+
   const handleLogin = () => {
-    window.location.href = ROUTES.LOGIN_REDIRECT;
+    setShowLoginForm(true);
+  };
+
+  const handleSubmitLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      await apiRequest(AUTH_API.getUser(), {
+        method: 'POST',
+        body: JSON.stringify({
+          email: formData.email,
+          firstName: formData.firstName || 'User',
+          lastName: formData.lastName || ''
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      toast({
+        title: "Welcome!",
+        description: "You've been logged in successfully",
+      });
+
+      // Redirect to home page
+      window.location.href = ROUTES.HOME;
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background" data-testid="landing-page">
+      {/* Login Form Modal */}
+      {showLoginForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold">Get Started Free</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowLoginForm(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <form onSubmit={handleSubmitLogin} className="space-y-4">
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="John"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Doe"
+                  />
+                </div>
+                
+                <Button 
+                  type="submit" 
+                  className="w-full bg-gradient-to-r from-primary to-secondary"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Creating Account..." : "Start Your AI Board"}
+                </Button>
+                
+                <p className="text-xs text-muted-foreground text-center">
+                  No credit card required • Start with 2 AI board members
+                </p>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 min-h-screen flex items-center">
