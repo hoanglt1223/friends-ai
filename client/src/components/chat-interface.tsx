@@ -58,7 +58,7 @@ export function ChatInterface() {
   });
 
   // Fetch messages for current conversation
-  const { data: messages = [] } = useQuery({
+  const { data: fetchedMessages = [] } = useQuery({
     queryKey: [CONVERSATIONS_API.getMessages(currentConversation || "")],
     queryFn: async () => {
       const response = await apiRequest("GET", CONVERSATIONS_API.getMessages(currentConversation!));
@@ -176,18 +176,18 @@ export function ChatInterface() {
   
   useEffect(() => {
     const conversationChanged = currentConversation !== lastConversationRef.current;
-    const messageCountChanged = conversationMessages?.length !== lastMessageCountRef.current;
+    const messageCountChanged = fetchedMessages?.length !== lastMessageCountRef.current;
     
-    if (currentConversation && conversationMessages && (conversationChanged || messageCountChanged)) {
-      setMessages(conversationMessages);
+    if (currentConversation && fetchedMessages && (conversationChanged || messageCountChanged)) {
+      setMessages(fetchedMessages);
       lastConversationRef.current = currentConversation;
-      lastMessageCountRef.current = conversationMessages.length;
+      lastMessageCountRef.current = fetchedMessages.length;
     } else if (!currentConversation && lastConversationRef.current !== null) {
       setMessages([]);
       lastConversationRef.current = null;
       lastMessageCountRef.current = 0;
     }
-  }, [currentConversation, conversationMessages?.length]); // Only depend on length, not full array
+  }, [currentConversation, fetchedMessages?.length]); // Only depend on length, not full array
 
   // Scroll to bottom when messages change
   useEffect(() => {
