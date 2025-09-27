@@ -18,9 +18,44 @@ export async function setupAuth(app: Express): Promise<void> {
     }
   }));
 
-  // Simple login endpoint for development
-  app.post('/api/auth/login', async (req, res) => {
+  // Consolidated auth endpoint matching Vercel API structure
+  app.get('/api/auth', (req, res) => {
+    // Check for development bypass
+    if (process.env.VITE_SKIP_LOGIN === 'true' || process.env.NODE_ENV === 'development' && process.env.VITE_SKIP_AUTH === 'true') {
+      const defaultUser = {
+        id: "dev-user",
+        email: "developer@example.com",
+        firstName: "Developer",
+        lastName: "User"
+      };
+      return res.json({ user: defaultUser });
+    }
+
+    // Check session for authenticated user
+    const sessionUser = (req.session as any)?.user;
+    if (!sessionUser) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    res.json({ user: sessionUser });
+  });
+
+  app.post('/api/auth', async (req, res) => {
     try {
+      const { action } = req.query;
+
+      // Handle logout action
+      if (action === 'logout') {
+        req.session.destroy((err) => {
+          if (err) {
+            return res.status(500).json({ message: 'Logout failed' });
+          }
+          res.json({ message: 'Logged out successfully' });
+        });
+        return;
+      }
+
+      // Handle login action (default)
       const { email, firstName, lastName } = req.body;
       
       if (!email) {
@@ -45,19 +80,9 @@ export async function setupAuth(app: Express): Promise<void> {
 
       res.json({ user, message: 'Logged in successfully' });
     } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Login failed' });
+      console.error('Auth error:', error);
+      res.status(500).json({ message: 'Authentication failed' });
     }
-  });
-
-  // Logout endpoint
-  app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy((err) => {
-      if (err) {
-        return res.status(500).json({ message: 'Logout failed' });
-      }
-      res.json({ message: 'Logged out successfully' });
-    });
   });
 }
 
@@ -78,7 +103,8 @@ export function isAuthenticated(req: Request, res: Response, next: NextFunction)
   // Check session
   const sessionUser = (req.session as any)?.user;
   if (!sessionUser) {
-    return res.status(401).json({ message: 'Authentication required' });
+    res.status(401).json({ message: 'Authentication required' });
+    return;
   }
 
   // Attach user to request
