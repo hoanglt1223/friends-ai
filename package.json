@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:server": "tsx server/index.ts",
-    "dev:full": "concurrently \"npm run dev:server\" \"npm run dev\"",
+    "dev:full": "concurrently \"pnpm run dev:server\" \"pnpm run dev\"",
     "build": "vite build",
     "preview": "vite preview",
     "check": "tsc",

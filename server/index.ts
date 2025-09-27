@@ -1,4 +1,10 @@
+import { loadEnv } from "vite";
 import express, { type Request, Response, NextFunction } from "express";
+
+// Load environment variables using Vite's loadEnv
+const env = loadEnv(process.env.NODE_ENV || 'development', process.cwd(), '');
+// Merge with process.env for compatibility
+Object.assign(process.env, env);
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -63,8 +69,7 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '3001', 10);
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true,
+    host: "localhost",
   }, () => {
     log(`serving on port ${port}`);
   });
